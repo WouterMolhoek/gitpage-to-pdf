@@ -1,24 +1,56 @@
 import urllib.request
 from bs4 import BeautifulSoup
+from fpdf import FPDF
 
-# Requested URL
-url = 'https://github.com/WouterMolhoek?tab=repositories'
+# Repositories URL
+url_repos = 'https://github.com/WouterMolhoek?tab=repositories'
+# Github Profile URL
+url_profile = 'https://github.com/WouterMolhoek'
 
-# Query the website (url) and return the html
-page = urllib.request.urlopen(url)
 
-# Parse the html using beautiful soup and store in variable `soup`
-soup = BeautifulSoup(page, 'html.parser')
+# Scrape data from the given URL
+def scrape_raw_data(url):
+    # Query the website (url) and return the html
+    page = urllib.request.urlopen(url)
 
-# Get the programmingLanguage item property
-programming_lan = soup.find_all(itemprop='programmingLanguage')
+    # Parse the html using beautiful soup and store in variable `soup`
+    return BeautifulSoup(page, 'html.parser')
 
-# Remove duplicates
-programming_lan = list(dict.fromkeys(programming_lan))
 
-# Get the profile image
-profile_img = soup.find(class_='avatar width-full avatar-before-user-status')
+def format_req_data():
+    profile = scrape_raw_data(url_profile)
+    repos = scrape_raw_data(url_repos)
 
-for language in programming_lan:
-    print(language.get_text())
+    # Get the profile image
+    profile_img = profile.find(class_='avatar width-full avatar-before-user-status')['src']
 
+    # Get the contribution activity
+    contribution = profile.find(class_='f4 text-normal mb-2').get_text()
+
+    # Get the programmingLanguage item property
+    programming_lan = repos.find_all(itemprop='programmingLanguage')
+
+    # Remove duplicate languages
+    programming_lan = list(dict.fromkeys(programming_lan))
+    languages = []
+
+    # Get innerText from the items and store that in the languages list
+    for language in programming_lan:
+        languages.append(language.get_text())
+
+    return [profile_img, languages, contribution]
+
+
+def create_pdf():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    data = format_req_data()
+
+    pdf.cell(200, 10, txt='Contribution = ' + data[2], ln=1, align="C")
+
+    pdf.output("Github-Profile.pdf")
+
+
+create_pdf()
