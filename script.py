@@ -13,6 +13,12 @@ soup = BeautifulSoup(page, 'html.parser')
 # Get the programmingLanguage item property
 programming_lan = soup.find_all(itemprop='programmingLanguage')
 
+# Remove duplicates
+programming_lan = list(dict.fromkeys(programming_lan))
+
+# Get the profile image
+profile_img = soup.find(class_='avatar width-full avatar-before-user-status')
+
 for language in programming_lan:
     print(language.get_text())
 
