@@ -2,11 +2,12 @@ import urllib.request
 from bs4 import BeautifulSoup
 from fpdf import FPDF
 
+github = 'WouterMolhoek'
 
 # Repositories URL
-url_repos = 'https://github.com/WouterMolhoek?tab=repositories'
+url_repos = 'https://github.com/' + github + '?tab=repositories'
 # Github Profile URL
-url_profile = 'https://github.com/WouterMolhoek'
+url_profile = 'https://github.com/' + github
 
 
 # Scrape data from the given URL
@@ -23,7 +24,7 @@ def format_req_data():
     repos = scrape_raw_data(url_repos)
 
     # Get the profile image
-    profile_img = profile.find(class_='avatar width-full avatar-before-user-status')['src']
+    profile_img = profile.find(class_='u-photo d-block position-relative')['href']
 
     # Get the profile name
     name = profile.find(itemprop='name').get_text()
@@ -63,17 +64,25 @@ def create_pdf():
 
     # Add layout-image to the page
     pdf.image('layout-pdf.jpg', x=0, y=0, w=210)
-    pdf.cell(200, 10, txt="{}".format(''), ln=1)
 
     # Add profile-image to the page
-    pdf.image('profile-image.jpg', x=10, y=10, w=70)
+    pdf.image('profile-image.jpg', x=18, y=8, w=81)
     pdf.cell(200, 10, txt="{}".format(''), ln=1)
 
-    # Add UserName
-    pdf.set_font("Arial", size=15)
-    pdf.cell(200, 0, txt=data[3], ln=1, align="C")
+    # Add UserName, make it BOLD
+    pdf.set_font("Arial", size=22, style="B")
+    pdf.cell(260, -15, txt=data[3], ln=1, align="C")
 
-    pdf.output("Github-Profile.pdf")
+    # Add language heading
+    pdf.set_font("Arial", size=22)
+    pdf.cell(70, 250, txt='Languages', ln=0, align="C")
+
+    # Add Contribution heading
+    pdf.set_font("Arial", size=22)
+    pdf.cell(120, 250, txt='Contribution', ln=1, align="C")
+
+    # Save the file
+    pdf.output('Github-Profile-(' + data[3] + ').pdf')
 
 
 create_pdf()
