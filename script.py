@@ -15,7 +15,7 @@ def scrape_raw_data(url):
     # Query the website (url) and return the html
     page = urllib.request.urlopen(url)
 
-    # Parse the html using beautiful soup and store in variable `soup`
+    # Parse the html
     return BeautifulSoup(page, 'html.parser')
 
 
@@ -28,6 +28,9 @@ def format_req_data():
 
     # Get the profile name
     name = profile.find(itemprop='name').get_text()
+
+    # Get the username
+    username = profile.find(itemprop='additionalName').get_text()
 
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
@@ -43,14 +46,13 @@ def format_req_data():
     for language in programming_lan:
         languages.append(language.get_text())
 
-    return [profile_img, languages, contribution, name]
+    return [profile_img, languages, contribution, name, username]
 
 
 def download_image(url):
     name = 'profile-image'
     fullname = str(name)+".jpg"
     urllib.request.urlretrieve(url, fullname)
-
 
 def create_pdf():
     pdf = FPDF()
@@ -66,22 +68,26 @@ def create_pdf():
     pdf.image('layout-pdf.jpg', x=0, y=0, w=210)
 
     # Add profile-image to the page
-    pdf.image('profile-image.jpg', x=18, y=8, w=81)
+    pdf.image('profile-image.jpg', x=18, y=8, w=81, link=data[0])
     pdf.cell(200, 10, txt="{}".format(''), ln=1)
 
-    # Add UserName, make it BOLD
+    # Add profile name, make it BOLD
     pdf.set_font("Arial", size=22, style="B")
-    pdf.cell(260, -15, txt=data[3], ln=1, align="C")
+    pdf.cell(264, -15, txt=data[3], ln=1, align="C")
 
-    # Add language heading
+    # Add username
+    pdf.set_font("Arial", size=18)
+    pdf.cell(249, 32, txt=data[4], ln=1, align="C")
+
+    # Add repository heading
     pdf.set_font("Arial", size=22)
-    pdf.cell(70, 250, txt='Languages', ln=0, align="C")
+    pdf.cell(70, 180, txt='Repositories', ln=0, align="C")
 
     # Add Contribution heading
     pdf.set_font("Arial", size=22)
-    pdf.cell(120, 250, txt='Contribution', ln=1, align="C")
+    pdf.cell(120, 180, txt='Contribution', ln=0, align="C")
 
-    # Save the file
+    # Save the file (add profile name)
     pdf.output('Github-Profile-(' + data[3] + ').pdf')
 
 
