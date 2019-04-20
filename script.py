@@ -1,6 +1,7 @@
 import urllib.request
 from bs4 import BeautifulSoup
 from fpdf import FPDF
+import webbrowser
 
 github = 'WouterMolhoek'
 
@@ -35,24 +36,17 @@ def format_req_data():
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
 
-    # Get the programmingLanguage item property
-    programming_lan = repos.find_all(itemprop='programmingLanguage')
+    # Get all the repositories on the first page
+    repositories = repos.find_all(itemprop='owns')
 
-    # Remove duplicate languages
-    programming_lan = list(dict.fromkeys(programming_lan))
-    languages = []
-
-    # Get innerText from the items and store that in the languages list
-    for language in programming_lan:
-        languages.append(language.get_text())
-
-    return [profile_img, languages, contribution, name, username]
+    return [profile_img, repositories, contribution, name, username]
 
 
 def download_image(url):
     name = 'profile-image'
     fullname = str(name)+".jpg"
     urllib.request.urlretrieve(url, fullname)
+
 
 def create_pdf():
     pdf = FPDF()
@@ -71,24 +65,28 @@ def create_pdf():
     pdf.image('profile-image.jpg', x=18, y=8, w=81, link=data[0])
     pdf.cell(200, 10, txt="{}".format(''), ln=1)
 
-    # Add profile name, make it BOLD
-    pdf.set_font("Arial", size=22, style="B")
-    pdf.cell(264, -15, txt=data[3], ln=1, align="C")
+    pdf.x = 110
+    pdf.y = 8
+    pdf.set_font('Arial', 'B', 22)
+    pdf.multi_cell(80, 10, data[3], 0, 'L')
+    pdf.x = 110
+    pdf.y = 16
+    pdf.set_font('Arial', '', 18)
+    pdf.multi_cell(80, 10, data[4], 0, 'L')
 
-    # Add username
-    pdf.set_font("Arial", size=18)
-    pdf.cell(249, 32, txt=data[4], ln=1, align="C")
+    pdf.y = 120
+    pdf.x = 22
+    pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
+    pdf.x = 115
+    pdf.y = 120
+    pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
 
-    # Add repository heading
-    pdf.set_font("Arial", size=22)
-    pdf.cell(70, 180, txt='Repositories', ln=0, align="C")
-
-    # Add Contribution heading
-    pdf.set_font("Arial", size=22)
-    pdf.cell(120, 180, txt='Contribution', ln=0, align="C")
+    file_name = 'Github-Profile-(' + data[3] + ').pdf'
 
     # Save the file (add profile name)
-    pdf.output('Github-Profile-(' + data[3] + ').pdf')
+    pdf.output(file_name)
 
+    # Open the created file
+    webbrowser.open_new(file_name)
 
 create_pdf()
