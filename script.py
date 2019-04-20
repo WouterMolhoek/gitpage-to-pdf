@@ -2,6 +2,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 from fpdf import FPDF
 
+
 # Repositories URL
 url_repos = 'https://github.com/WouterMolhoek?tab=repositories'
 # Github Profile URL
@@ -24,6 +25,9 @@ def format_req_data():
     # Get the profile image
     profile_img = profile.find(class_='avatar width-full avatar-before-user-status')['src']
 
+    # Get the profile name
+    name = profile.find(itemprop='name').get_text()
+
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
 
@@ -38,7 +42,13 @@ def format_req_data():
     for language in programming_lan:
         languages.append(language.get_text())
 
-    return [profile_img, languages, contribution]
+    return [profile_img, languages, contribution, name]
+
+
+def download_image(url):
+    name = 'profile-image'
+    fullname = str(name)+".jpg"
+    urllib.request.urlretrieve(url, fullname)
 
 
 def create_pdf():
@@ -48,7 +58,20 @@ def create_pdf():
 
     data = format_req_data()
 
-    pdf.cell(200, 10, txt='Contribution = ' + data[2], ln=1, align="C")
+    # Download profile image
+    download_image(data[0])
+
+    # Add layout-image to the page
+    pdf.image('layout-pdf.jpg', x=0, y=0, w=210)
+    pdf.cell(200, 10, txt="{}".format(''), ln=1)
+
+    # Add profile-image to the page
+    pdf.image('profile-image.jpg', x=10, y=10, w=70)
+    pdf.cell(200, 10, txt="{}".format(''), ln=1)
+
+    # Add UserName
+    pdf.set_font("Arial", size=15)
+    pdf.cell(200, 0, txt=data[3], ln=1, align="C")
 
     pdf.output("Github-Profile.pdf")
 
