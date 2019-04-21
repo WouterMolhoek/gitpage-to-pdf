@@ -45,7 +45,7 @@ def format_req_data():
 def download_image(url):
     name = 'profile-image'
     fullname = str(name)+".jpg"
-    urllib.request.urlretrieve(url, fullname)
+    urllib.request.urlretrieve(url, 'img/' + fullname)
 
 
 def create_pdf():
@@ -59,11 +59,16 @@ def create_pdf():
     download_image(data[0])
 
     # Add layout-image to the page
-    pdf.image('layout-pdf.jpg', x=0, y=0, w=210)
+    pdf.image('img/layout-pdf.jpg', x=0, y=0, w=210)
 
     # Add profile-image to the page
-    pdf.image('profile-image.jpg', x=18, y=8, w=81, link=data[0])
-    pdf.cell(200, 10, txt="{}".format(''), ln=1)
+    pdf.image('img/profile-image.jpg', x=18, y=8, w=81, link=data[0])
+
+    # Add github-logo
+    pdf.image('img/github-logo.png', x=113, y=82, w=5, link=url_profile)
+    pdf.x = 118
+    pdf.y = 80
+    pdf.multi_cell(50, 10, '/ ' + data[4], 0, 'L')
 
     pdf.x = 110
     pdf.y = 8
@@ -76,9 +81,11 @@ def create_pdf():
 
     pdf.y = 120
     pdf.x = 22
+    # Add 'Repositories' heading
     pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
     pdf.x = 115
     pdf.y = 120
+    # Add 'Contribution' heading
     pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
 
     file_name = 'Github-Profile-(' + data[3] + ').pdf'
