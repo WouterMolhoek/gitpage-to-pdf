@@ -70,22 +70,26 @@ def create_pdf():
     pdf.y = 80
     pdf.multi_cell(50, 10, '/ ' + data[4], 0, 'L')
 
+    # Add name
     pdf.x = 110
     pdf.y = 8
     pdf.set_font('Arial', 'B', 22)
     pdf.multi_cell(80, 10, data[3], 0, 'L')
+
+    # Add username
     pdf.x = 110
     pdf.y = 16
     pdf.set_font('Arial', '', 18)
     pdf.multi_cell(80, 10, data[4], 0, 'L')
 
+    # Add 'Repositories' heading
     pdf.y = 120
     pdf.x = 22
-    # Add 'Repositories' heading
     pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
+
+    # Add 'Contribution' heading
     pdf.x = 115
     pdf.y = 120
-    # Add 'Contribution' heading
     pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
 
     file_name = 'Github-Profile-(' + data[3] + ').pdf'
