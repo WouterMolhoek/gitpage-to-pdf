@@ -65,31 +65,48 @@ def create_pdf():
     pdf.image('img/profile-image.jpg', x=18, y=8, w=81, link=data[0])
 
     # Add github-logo
-    pdf.image('img/github-logo.png', x=113, y=82, w=5, link=url_profile)
+    pdf.image('img/github-logo.png', x=113, y=84, w=5, link=url_profile)
     pdf.x = 118
-    pdf.y = 80
+    pdf.y = 82
+    # Add git link
     pdf.multi_cell(50, 10, '/ ' + data[4], 0, 'L')
 
     # Add name
     pdf.x = 110
-    pdf.y = 8
+    pdf.y = 6
     pdf.set_font('Arial', 'B', 22)
     pdf.multi_cell(80, 10, data[3], 0, 'L')
 
     # Add username
     pdf.x = 110
-    pdf.y = 16
+    pdf.y = 14
     pdf.set_font('Arial', '', 18)
     pdf.multi_cell(80, 10, data[4], 0, 'L')
 
     # Add 'Repositories' heading
     pdf.y = 120
+    repository_y = pdf.y
     pdf.x = 22
+    pdf.set_font('Arial', style='B')
     pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
+
+    # Define space between repository paragraphs
+    space = 15
+
+    for repository in data[1]:
+        # Repository title
+        title = str(repository.find(itemprop='name codeRepository').get_text())
+
+        pdf.x = 22
+        pdf.y = repository_y + space
+        pdf.set_font('Arial')
+        pdf.multi_cell(70, 10, title.lstrip(), 0, 'L')
+        space += 15
 
     # Add 'Contribution' heading
     pdf.x = 115
     pdf.y = 120
+    pdf.set_font('Arial', style='B')
     pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
 
     file_name = 'Github-Profile-(' + data[3] + ').pdf'
