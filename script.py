@@ -37,6 +37,12 @@ def format_req_data():
     # Get the username
     username = profile.find(itemprop='additionalName').get_text()
 
+    # Get the description
+    description = profile.find(class_='p-note user-profile-bio js-user-profile-bio mb-3').get_text()
+
+    # Get the location
+    location = profile.find(itemprop='homeLocation').get_text()
+
     # Get the followers and following
     nav_container = profile.find(class_='UnderlineNav user-profile-nav js-sticky top-0')
     followers = nav_container.find_all(class_='Counter')[3].get_text()
@@ -48,7 +54,7 @@ def format_req_data():
     # Get all the repositories on the first page
     repositories = repos.find_all(itemprop='owns')
 
-    return [profile_img, repositories, contribution, name, username, followers.lstrip(), following.lstrip()]
+    return [profile_img, repositories, contribution, name, username, followers.lstrip(), following.lstrip(), description, location]
 
 
 def download_image(url):
@@ -72,6 +78,8 @@ def create_pdf():
     username= data[4]
     followers = data[5]
     following = data[6]
+    description = data[7]
+    location = data[8]
 
     # Download profile image
     download_image(profile_img)
@@ -94,13 +102,25 @@ def create_pdf():
     pdf.set_font('Arial', '', 18)
     pdf.multi_cell(80, 10, username, 0, 'L')
 
+    # Add the description
+    pdf.x = 110
+    pdf.y = 30
+    pdf.set_font('Arial', 'I', 12)
+    pdf.multi_cell(62, 10, description, 0, 'L')
+
+    # Add the location
+    pdf.x = 110
+    pdf.y = 34
+    pdf.set_font('Arial', '', 12)
+    pdf.multi_cell(62, 10, location, 0, 'L')
+
     # Add github-logo
-    #pdf.image('img/github-logo.png', x=113, y=64, w=5, link=url_profile)
+    pdf.image('img/github-logo.png', x=113, y=64, w=5, link=url_profile)
     # Add git link (string)
-    #pdf.x = 118
-    #pdf.y = 62
-    #pdf.set_font('Arial', '', 12)
-    #pdf.multi_cell(50, 10, '/ ' + username, 0, 'L')
+    pdf.x = 118
+    pdf.y = 62
+    pdf.set_font('Arial', '', 12)
+    pdf.multi_cell(50, 10, '/ ' + username, 0, 'L')
 
     # Add followers button
     pdf.image('img/button.png', x=107, y=73, w=45, h=22, link=url_followers)
