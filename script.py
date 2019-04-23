@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 import webbrowser
 
-github_account = 'bufferbandit'
+github_account = 'WouterMolhoek'
 github_url = 'https://github.com/'
 
 # Repositories URL
