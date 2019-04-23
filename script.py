@@ -169,7 +169,6 @@ def create_pdf():
         # Add the title
         pdf.x = 22
         pdf.y = repository_y + offset
-        title_y = pdf.y
         pdf.set_font('Arial','', 12)
         pdf.multi_cell(78, 10, f'- {title.lstrip()}', 0, 'L')
         offset += 15
