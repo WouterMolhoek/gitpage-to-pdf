@@ -51,6 +51,7 @@ def format_req_data():
 
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
+    contribution = contribution.split(None, 1)[0]
 
     # Get all the repositories on the first page, only get the first 8 items
     repositories = repos.find_all(itemprop='owns')[:8]
@@ -141,7 +142,7 @@ def create_pdf():
     pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
 
     # Define space between the first repository paragraph and the 'Repositories' heading
-    space = 15
+    space = 12
 
     for repository in repositories:
         # Repository title
@@ -152,7 +153,7 @@ def create_pdf():
         pdf.y = repository_y + space
         title_y = pdf.y
         pdf.set_font('Arial','', 12)
-        pdf.multi_cell(70, 10, f'-  {title.lstrip()}', 0, 'L')
+        pdf.multi_cell(75, 10, f'-  {title.lstrip()}', 0, 'L')
         space += 15
 
     # Add 'Contribution' heading
@@ -160,6 +161,12 @@ def create_pdf():
     pdf.y = 120
     pdf.set_font('Arial', 'B', 18)
     pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
+
+    # Add contribution count
+    pdf.x = 115
+    pdf.y = 131
+    pdf.set_font('Arial', '', 12)
+    pdf.multi_cell(60, 10, f'{contribution} contributions last year', 0, 'L')
 
     file_name = f'Github-Profile-({name}).pdf'
 
