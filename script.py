@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 import webbrowser
 
-github_account = 'WouterMolhoek'
+github_account = 'bufferbandit'
 github_url = 'https://github.com/'
 
 # Repositories URL
@@ -49,30 +49,38 @@ def format_req_data():
 
     # Get the followers and following
     nav_container = profile.find(class_='UnderlineNav user-profile-nav js-sticky top-0')
-    followers = nav_container.find_all(class_='Counter')[3].get_text()
-    following = nav_container.find_all(class_='Counter')[4].get_text()
+    followers = nav_container.find_all(class_='Counter')[3].get_text().lstrip()
+    following = nav_container.find_all(class_='Counter')[4].get_text().lstrip()
 
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
     contribution = contribution.split(None, 1)[0]
 
-    # Get all the repositories on the first page, only get the first 8 items
-    repositories = repos.find_all(itemprop='owns')[:8]
+    # Get the current month of activity
+    month = profile.find(class_='profile-timeline-month-heading bg-white d-inline-block h6 pr-2 py-1').get_text().strip()
 
-    return (profile_img, repositories, contribution, name, username, followers.lstrip(), following.lstrip(), description, location)
+    created_details_container = profile.find(class_='profile-rollup-wrapper py-4 pl-4 position-relative ml-3 js-details-container Details open')
+    # Get the created commits from the current month
+    created_commits = created_details_container.find(class_='float-left').get_text().strip()
+    created_commits = ' '.join(created_commits.split())
+
+    # Get all the repositories on the first page, only get the first 8 items and the toal count of repositories
+    repositories = repos.find_all(itemprop='owns')[:8]
+    total_repositories = nav_container.find_all(class_='Counter')[0].get_text().strip()
+
+    return (profile_img, repositories, contribution, name, username, followers, following, description, location, total_repositories, month, created_commits)
 
 
 def download_image(url):
-    name = 'profile-image'
-    fullname = str(name)+".jpg"
-    urllib.request.urlretrieve(url, f'img/{fullname}')
+    file_name = 'profile-image.jpg'
+    urllib.request.urlretrieve(url, f'img/{file_name}')
 
 
 def create_pdf():
     pdf = FPDF()
     pdf.add_page()
 
-    profile_img, repositories, contribution, name, username, followers, following, description, location = format_req_data()
+    profile_img, repositories, contribution, name, username, followers, following, description, location, total_repositories, month, created_commits = format_req_data()
 
     # Download profile image
     download_image(profile_img)
@@ -110,7 +118,6 @@ def create_pdf():
 
     if len(description) > 140:
             pdf.y = 48
-
     else:
         pdf.y = 33
 
@@ -150,7 +157,7 @@ def create_pdf():
     pdf.x = 22
     repository_y = pdf.y
     pdf.set_font('Arial', 'B', 18)
-    pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
+    pdf.multi_cell(75, 10, f'Repositories ({total_repositories})', 0, 'L')
 
     # Defines offset between the first repository paragraph and the 'Repositories' heading
     offset = 12
@@ -178,6 +185,18 @@ def create_pdf():
     pdf.y = 131
     pdf.set_font('Arial', '', 12)
     pdf.multi_cell(60, 10, f'{contribution} contributions last year', 0, 'L')
+
+    # Add month contribution heading
+    pdf.x = 115
+    pdf.y = 163
+    pdf.set_font('Arial', 'B', 18)
+    pdf.multi_cell(50, 10, month, 0, 'L')
+
+    # Add month contribution heading
+    pdf.x = 115
+    pdf.y = 175
+    pdf.set_font('Arial', '', 12)
+    pdf.multi_cell(50, 10, created_commits, 0, 'L')
 
     file_name = f'Github-Profile-({name}).pdf'
 
