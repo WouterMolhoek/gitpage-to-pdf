@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 import webbrowser
 
-github_account = 'WouterMolhoek'
+github_account = 'ph00lt0'
 github_url = 'https://github.com/'
 
 # Repositories URL
@@ -39,7 +39,11 @@ def format_req_data():
 
     # Get the description
     description = profile.find(class_='p-note user-profile-bio js-user-profile-bio mb-3').get_text()
-    if len(description) == 0: description = 'User has no description'
+    if len(description) == 0:
+        description = 'User has no description'
+    else:
+        description = (description.encode('ascii', 'ignore')).decode("utf-8").lstrip()
+
 
     # Get the location
     location = profile.find(itemprop='homeLocation')
@@ -82,13 +86,13 @@ def create_pdf():
 
     # Add name
     pdf.x = 110
-    pdf.y = 6
+    pdf.y = 6.5
     pdf.set_font('Arial', 'B', 22)
     pdf.multi_cell(80, 10, name, 0, 'L')
 
     # Add username
     pdf.x = 110
-    pdf.y = 14
+    pdf.y = 14.5
     pdf.set_font('Arial', '', 18)
     pdf.multi_cell(80, 10, username, 0, 'L')
 
@@ -96,7 +100,7 @@ def create_pdf():
     pdf.x = 110
     pdf.y = 30
     pdf.set_font('Arial', 'I', 12)
-    pdf.multi_cell(62, 10, description, 0, 'L')
+    pdf.multi_cell(70, 10, description, 0, 'L')
 
     # Add the location
     pdf.x = 110
@@ -123,7 +127,7 @@ def create_pdf():
     # Add followers count
     pdf.x = 112
     pdf.y = 79.5
-    pdf.set_font('Arial', 'B', 12)
+    pdf.set_font('Arial', 'B', 11)
     pdf.multi_cell(37, 10, f'Followers: {followers}', 0, 'C')
 
     # Add following button
@@ -131,7 +135,7 @@ def create_pdf():
     # Add followeing count
     pdf.x = 156
     pdf.y = 79.5
-    pdf.set_font('Arial', 'B', 12)
+    pdf.set_font('Arial', 'B', 11)
     pdf.multi_cell(37, 10, f'Following: {following}', 0, 'C')
 
     # Add 'Repositories' heading
@@ -141,8 +145,8 @@ def create_pdf():
     pdf.set_font('Arial', 'B', 18)
     pdf.multi_cell(50, 10, 'Repositories', 0, 'L')
 
-    # Define space between the first repository paragraph and the 'Repositories' heading
-    space = 12
+    # Defines offset between the first repository paragraph and the 'Repositories' heading
+    offset = 12
 
     for repository in repositories:
         # Repository title
@@ -150,11 +154,11 @@ def create_pdf():
 
         # Add the title
         pdf.x = 22
-        pdf.y = repository_y + space
+        pdf.y = repository_y + offset
         title_y = pdf.y
         pdf.set_font('Arial','', 12)
-        pdf.multi_cell(75, 10, f'-  {title.lstrip()}', 0, 'L')
-        space += 15
+        pdf.multi_cell(78, 10, f'- {title.lstrip()}', 0, 'L')
+        offset += 15
 
     # Add 'Contribution' heading
     pdf.x = 115
