@@ -39,9 +39,10 @@ def format_req_data():
 
     # Get the description
     description = profile.find(class_='p-note user-profile-bio js-user-profile-bio mb-3').get_text()
+    if len(description) == 0: description = 'User has no description'
 
     # Get the location
-    location = profile.find(itemprop='homeLocation').get_text()
+    location = profile.find(itemprop='homeLocation')
 
     # Get the followers and following
     nav_container = profile.find(class_='UnderlineNav user-profile-nav js-sticky top-0')
@@ -51,35 +52,23 @@ def format_req_data():
     # Get the contribution activity
     contribution = profile.find(class_='f4 text-normal mb-2').get_text()
 
-    # Get all the repositories on the first page
-    repositories = repos.find_all(itemprop='owns')
+    # Get all the repositories on the first page, only get the first 8 items
+    repositories = repos.find_all(itemprop='owns')[:8]
 
-    return [profile_img, repositories, contribution, name, username, followers.lstrip(), following.lstrip(), description, location]
+    return (profile_img, repositories, contribution, name, username, followers.lstrip(), following.lstrip(), description, location)
 
 
 def download_image(url):
     name = 'profile-image'
     fullname = str(name)+".jpg"
-    urllib.request.urlretrieve(url, 'img/' + fullname)
+    urllib.request.urlretrieve(url, f'img/{fullname}')
 
 
 def create_pdf():
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
 
-    data = format_req_data()
-
-    # Formdat data
-    profile_img = data[0]
-    repositories = data[1]
-    contribution = data[2]
-    name = data[3]
-    username= data[4]
-    followers = data[5]
-    following = data[6]
-    description = data[7]
-    location = data[8]
+    profile_img, repositories, contribution, name, username, followers, following, description, location = format_req_data()
 
     # Download profile image
     download_image(profile_img)
@@ -110,17 +99,23 @@ def create_pdf():
 
     # Add the location
     pdf.x = 110
-    pdf.y = 34
+    if location is None:
+        location = 'User has no location'
+        pdf.y = 40
+    else:
+        location = location.get_text()
+        pdf.y = 34
+
     pdf.set_font('Arial', '', 12)
-    pdf.multi_cell(62, 10, location, 0, 'L')
+    pdf.multi_cell(62, 10, str(location), 0, 'L')
 
     # Add github-logo
-    pdf.image('img/github-logo.png', x=113, y=64, w=5, link=url_profile)
+    pdf.image('img/github-logo.png', x=112, y=64, w=5, link=url_profile)
     # Add git link (string)
-    pdf.x = 118
+    pdf.x = 117
     pdf.y = 62
     pdf.set_font('Arial', '', 12)
-    pdf.multi_cell(50, 10, '/ ' + username, 0, 'L')
+    pdf.multi_cell(50, 10, f'/ {username}', 0, 'L')
 
     # Add followers button
     pdf.image('img/button.png', x=107, y=73, w=45, h=22, link=url_followers)
@@ -128,7 +123,7 @@ def create_pdf():
     pdf.x = 112
     pdf.y = 79.5
     pdf.set_font('Arial', 'B', 12)
-    pdf.multi_cell(37, 10, 'Followers: ' + followers, 0, 'C')
+    pdf.multi_cell(37, 10, f'Followers: {followers}', 0, 'C')
 
     # Add following button
     pdf.image('img/button.png', x=152, y=73, w=45, h=22, link=url_following)
@@ -136,7 +131,7 @@ def create_pdf():
     pdf.x = 156
     pdf.y = 79.5
     pdf.set_font('Arial', 'B', 12)
-    pdf.multi_cell(37, 10, 'Following: ' + following, 0, 'C')
+    pdf.multi_cell(37, 10, f'Following: {following}', 0, 'C')
 
     # Add 'Repositories' heading
     pdf.y = 120
@@ -156,8 +151,8 @@ def create_pdf():
         pdf.x = 22
         pdf.y = repository_y + space
         title_y = pdf.y
-        pdf.set_font('Arial','', 14)
-        pdf.multi_cell(70, 10, title.lstrip(), 0, 'L')
+        pdf.set_font('Arial','', 12)
+        pdf.multi_cell(70, 10, f'-  {title.lstrip()}', 0, 'L')
         space += 15
 
     # Add 'Contribution' heading
@@ -166,7 +161,7 @@ def create_pdf():
     pdf.set_font('Arial', 'B', 18)
     pdf.multi_cell(50, 10, 'Contribution', 0, 'L')
 
-    file_name = 'Github-Profile-(' + name + ').pdf'
+    file_name = f'Github-Profile-({name}).pdf'
 
     # Save the file (add profile name)
     pdf.output(file_name)
