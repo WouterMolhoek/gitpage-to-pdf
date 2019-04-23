@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 import webbrowser
 
-github_account = 'ph00lt0'
+github_account = 'WouterMolhoek'
 github_url = 'https://github.com/'
 
 # Repositories URL
@@ -43,7 +43,6 @@ def format_req_data():
         description = 'User has no description'
     else:
         description = (description.encode('ascii', 'ignore')).decode("utf-8").lstrip()
-
 
     # Get the location
     location = profile.find(itemprop='homeLocation')
@@ -98,27 +97,35 @@ def create_pdf():
 
     # Add the description
     pdf.x = 110
-    pdf.y = 30
-    pdf.set_font('Arial', 'I', 12)
-    pdf.multi_cell(70, 10, description, 0, 'L')
+    pdf.y = 28
+    pdf.set_font('Arial', '', 12)
+    pdf.multi_cell(75, 5, description, 0, 'L')
 
     # Add the location
     pdf.x = 110
     if location is None:
         location = 'User has no location'
-        pdf.y = 40
     else:
         location = location.get_text()
-        pdf.y = 34
 
-    pdf.set_font('Arial', '', 12)
+    if len(description) > 140:
+            pdf.y = 48
+
+    else:
+        pdf.y = 33
+
+    pdf.set_font('Arial', 'I', 12)
     pdf.multi_cell(62, 10, str(location), 0, 'L')
 
     # Add github-logo
-    pdf.image('img/github-logo.png', x=112, y=64, w=5, link=url_profile)
+    if len(description) > 140:
+        logo_y = 67
+    else:
+        logo_y = 61
+    pdf.image('img/github-logo.png', x=112, y=logo_y + 2, w=5, link=url_profile)
     # Add git link (string)
     pdf.x = 117
-    pdf.y = 62
+    pdf.y = logo_y
     pdf.set_font('Arial', '', 12)
     pdf.multi_cell(50, 10, f'/ {username}', 0, 'L')
 
