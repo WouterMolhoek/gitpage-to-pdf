@@ -38,7 +38,7 @@ def format_req_data():
     username = profile.find(itemprop='additionalName').get_text()
 
     # Get the description
-    description = profile.find(class_='p-note user-profile-bio js-user-profile-bio mb-3').get_text()
+    description = profile.find(class_='p-note user-profile-bio js-user-profile-bio').get_text()
     if len(description) == 0:
         description = 'User has no description'
     else:
