@@ -48,7 +48,7 @@ def format_req_data():
     location = profile.find(itemprop='homeLocation')
 
     # Get the followers and following
-    nav_container = profile.find(class_='UnderlineNav user-profile-nav js-sticky top-0')
+    nav_container = profile.find(class_='UnderlineNav-body')
     followers = nav_container.find_all(class_='Counter')[3].get_text().lstrip()
     following = nav_container.find_all(class_='Counter')[4].get_text().lstrip()
 
